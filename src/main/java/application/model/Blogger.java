@@ -18,12 +18,14 @@ import java.util.List;
 public class Blogger implements UserDetails {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String username;
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String emilAddress;
+    @Column(nullable = false)
     private String password;
     private byte[] pic;
 
@@ -57,6 +59,19 @@ public class Blogger implements UserDetails {
         this(username, emilAddress, password);
         this.pic = pic;
     }
+
+    /*public Blogger(long id, String username, String emilAddress, byte[] pic, UserRole authority, LocalDateTime regTime,
+                   boolean isLocked*//*, List<Blog> blogs, List<Comment> comments*//*) {
+        this.id = id;
+        this.username = username;
+        this.emilAddress = emilAddress;
+        this.pic = pic;
+        this.authority = authority;
+        this.regTime = regTime;
+        this.isLocked = isLocked;
+        *//*this.blogs = blogs;
+        this.comments = comments;*//*
+    }*/
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
