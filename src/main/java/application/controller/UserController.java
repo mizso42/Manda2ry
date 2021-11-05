@@ -2,6 +2,7 @@ package application.controller;
 
 import application.model.Blog;
 import application.model.BlogEntry;
+import application.model.Comment;
 import application.service.BloggerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.nio.file.attribute.UserPrincipalNotFoundException;
@@ -32,19 +34,27 @@ public class UserController {
     }
 
     @GetMapping("/blogs/{blogId}")
-    public List<Blog> getBlogById(@PathVariable Long blogId) { //TODO handlig non-existing IDs
+    public List<Blog> getBlogById(@PathVariable Long blogId) { //TODO handling non-existing IDs
         if (blogId == null)
             return service.loadAllBlog();
 
         return Collections.singletonList(service.loadBlogById(blogId));
     }
 
-    @GetMapping("/blogs/{blogId}/entry/{entryId}")
-    public List<BlogEntry> getBlogEntryById(@PathVariable Long blogId, @PathVariable Long entryId) { //TODO handlig non-existing IDs
+    @GetMapping("/blogs/{blogId}/entries/{entryId}")
+    public List<BlogEntry> getBlogEntryById(@PathVariable Long blogId, @PathVariable Long entryId) { //TODO handling non-existing IDs
         if (entryId == null)
             return service.loadAllEntryFromBlog(blogId);
 
         return Collections.singletonList(service.loadBlogEntryById(entryId));
+    }
+
+    @GetMapping("blogs/{blogId}/entries/{entryId}/comments")
+    public List<Comment> getCommentsFromEntry(@PathVariable Long blogId, @PathVariable Long entryId,  //TODO handling non-existing IDs
+                                              @RequestParam(name = "show_comments") Boolean show) {
+        if (show)
+            return service.loadAllCommentFromEntry(entryId);
+        return null;
     }
 
     //TODO scrap this
