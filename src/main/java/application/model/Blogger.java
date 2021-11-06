@@ -1,5 +1,6 @@
 package application.model;
 
+import application.module.Helper;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,6 +13,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 @Entity
 @Getter @Setter
@@ -58,6 +60,31 @@ public class Blogger implements UserDetails {
     public Blogger(String username, String emilAddress, String password, byte[] pic) {
         this(username, emilAddress, password);
         this.pic = pic;
+    }
+
+    public void updateBlogger(Map<String, String> dataMap) {
+
+        if (dataMap.containsKey("username"))
+            this.username = dataMap.get("username");
+        if (dataMap.containsKey("emilAddress"))
+            this.emilAddress = dataMap.get("emilAddress");
+        if (dataMap.containsKey("password"))
+            this.password = dataMap.get("password");
+        if (dataMap.containsKey("pic"))
+            this.pic = Helper.stringToBytes(dataMap.get("pic"));
+        if (dataMap.containsKey("authority"))
+            this.authority = UserRole.valueOf(dataMap.get("authority"));
+        if (dataMap.containsKey("isLocked"))
+            this.isLocked = Boolean.parseBoolean(dataMap.get("isLocked"));
+
+    }
+
+    public void updateBlogs(Blog blog) {
+        blogs.add(blog);
+    }
+
+    public void updateComments(Comment comment) {
+        comments.add(comment);
     }
 
     /*public Blogger(long id, String username, String emilAddress, byte[] pic, UserRole authority, LocalDateTime regTime,
