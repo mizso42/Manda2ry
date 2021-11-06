@@ -16,7 +16,6 @@ import javax.persistence.PersistenceContext;
 import javax.transaction.Transactional;
 import java.lang.reflect.Field;
 import java.nio.file.attribute.UserPrincipalNotFoundException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,7 +26,7 @@ public class BloggerService implements UserDetailsService {
     @PersistenceContext
     private EntityManager manager;
 
-    private PasswordEncoder encoder;
+    private final PasswordEncoder encoder;
 
     @Autowired
     public BloggerService(PasswordEncoder encoder) {
@@ -62,24 +61,32 @@ public class BloggerService implements UserDetailsService {
 
     @Transactional
     public List<String> updateOwnData(Map<String, String> dataMap) throws MyException, UserPrincipalNotFoundException {
-        List<String> updatedFields = new ArrayList<>();
+        List<String> updatedFields;
         Map<String, String> personalUpdate = new HashMap<>();
 
-        try {
-            for (Field field : Blogger.class.getDeclaredFields()) {
-                if (!(field.equals(Blogger.class.getDeclaredField("id")) ||
-                        field.equals(Blogger.class.getDeclaredField("authority")) ||
-                        field.equals(Blogger.class.getDeclaredField("regTime")) ||
-                        field.equals(Blogger.class.getDeclaredField("isLocked")) ||
-                        field.equals(Blogger.class.getDeclaredField("blogs")) ||
-                        field.equals(Blogger.class.getDeclaredField("comments"))) &&
-                        dataMap.containsKey(field.getName())) {
+        for (Field field : Blogger.class.getDeclaredFields()) {
+            if (!(field.getName().equals("id") ||
+                    field.getName().equals("authority") ||
+                    field.getName().equals("regTime") ||
+                    field.getName().equals("isLocked") ||
+                    field.getName().equals("blogs") ||
+                    field.getName().equals("comments")) &&
+                    dataMap.containsKey(field.getName())) {
 
-                    personalUpdate.put((field.getName()), dataMap.get(field.getName()));
+                if (field.getName().equals("password")) {
+                    if (dataMap.containsKey("re_password")) {
+                        if (dataMap.get(field.getName()).equals(dataMap.get("re_password"))) {
+                            dataMap.put(field.getName(), encoder.encode(dataMap.get(field.getName())));
+                        } else {
+                            throw new MyException("Passwords don't match.");
+                        }
+                    } else {
+                        throw new MyException("Please reinforce your password!");
+                    }
                 }
+
+                personalUpdate.put((field.getName()), dataMap.get(field.getName()));
             }
-        } catch (NoSuchFieldException e) {
-            throw new MyException("Class Blogger fields has been modified.");
         }
 
         updatedFields = personalUpdate.keySet().stream().toList();
